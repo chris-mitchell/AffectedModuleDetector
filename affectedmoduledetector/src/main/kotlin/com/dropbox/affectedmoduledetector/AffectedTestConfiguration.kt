@@ -15,10 +15,7 @@ open class AffectedTestConfiguration {
      *  gradlew runAffectedUnitTests will run testDebugUnitTest
      *
      */
-    var variantToTest: String? = null
-        get() {
-            return field ?: "debug"
-        }
+    var variantToTest: String = "debug"
 
     /**
      * when [jvmTest] task is not found we will try to run [jvmTestBackup]
@@ -26,9 +23,9 @@ open class AffectedTestConfiguration {
      */
     var jvmTestBackup = "test"
 
-    val assembleAndroidTestTask get() = "assemble${variantToTest?.capitalize()}AndroidTest"
-    val runAndroidTestTask get() = "connected${variantToTest?.capitalize()}AndroidTest"
-    val jvmTest get() = "test${variantToTest?.capitalize()}UnitTest"
+    val assembleAndroidTestTask get() = "assemble${variantToTest.capitalize()}AndroidTest"
+    val runAndroidTestTask get() = "connected${variantToTest.capitalize()}AndroidTest"
+    val jvmTest get() = "test${variantToTest.capitalize()}UnitTest"
 
     companion object {
         const val name = "affectedTestConfiguration"

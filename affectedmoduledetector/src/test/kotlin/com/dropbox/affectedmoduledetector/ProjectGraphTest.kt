@@ -60,6 +60,9 @@ class ProjectGraphTest {
                 p2,
                 graph.findContainingProject("p2/a/b/c/d/e/f/a.java".toLocalPath())
         )
+
+        assertNull(graph.findContainingProject(""))
     }
     private fun String.toLocalPath() = this.split("/").joinToString(File.separator)
 }
+

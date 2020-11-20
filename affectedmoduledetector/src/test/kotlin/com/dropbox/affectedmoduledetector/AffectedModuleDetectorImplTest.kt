@@ -1,7 +1,8 @@
 package com.dropbox.affectedmoduledetector
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 import org.gradle.api.plugins.ExtraPropertiesExtension
 import org.gradle.testfixtures.ProjectBuilder
 import org.hamcrest.CoreMatchers
@@ -80,6 +81,7 @@ class AffectedModuleDetectorImplTest {
         p4
 
          */
+
 
         root = ProjectBuilder.builder()
             .withProjectDir(tmpDir)
@@ -168,6 +170,7 @@ class AffectedModuleDetectorImplTest {
             it.baseDir = tmpDir.absolutePath
             it.pathsAffectingAllModules = pathsAffectingAllModules
         }
+        root.extensions.add(AffectedModuleConfiguration.name, affectedModuleConfiguration)
     }
 
     @Test
@@ -1191,7 +1194,7 @@ class AffectedModuleDetectorImplTest {
             fail("Invalid state, should have thrown exception")
         } catch (e: IllegalArgumentException) {
             // THEN
-            Truth.assertThat("Could not find expected path in pathsAffectingAllModules: invalid").isEqualTo(e.message)
+            assertThat("Could not find expected path in pathsAffectingAllModules: invalid").isEqualTo(e.message)
         }
     }
 
@@ -1207,7 +1210,7 @@ class AffectedModuleDetectorImplTest {
         val result = config.pathsAffectingAllModules
 
         // THEN
-        Truth.assertThat(result).isEqualTo(pathsAffectingAllModules)
+        assertThat(result).isEqualTo(pathsAffectingAllModules)
     }
 
     @Test
@@ -1225,9 +1228,9 @@ class AffectedModuleDetectorImplTest {
             ),
             config = affectedModuleConfiguration
         )
-        Truth.assertThat(detector.shouldInclude(p1)).isTrue()
-        Truth.assertThat(detector.shouldInclude(p4)).isFalse()
-        Truth.assertThat(detector.shouldInclude(p5)).isFalse()
+        assertThat(detector.shouldInclude(p1)).isTrue()
+        assertThat(detector.shouldInclude(p4)).isFalse()
+        assertThat(detector.shouldInclude(p5)).isFalse()
     }
 
     @Test
@@ -1245,10 +1248,10 @@ class AffectedModuleDetectorImplTest {
             ),
             config = affectedModuleConfiguration
         )
-        Truth.assertThat(detector.shouldInclude(p1)).isFalse()
-        Truth.assertThat(detector.shouldInclude(p3)).isFalse()
-        Truth.assertThat(detector.shouldInclude(p4)).isFalse()
-        Truth.assertThat(detector.shouldInclude(p5)).isFalse()
+        assertThat(detector.shouldInclude(p1)).isFalse()
+        assertThat(detector.shouldInclude(p3)).isFalse()
+        assertThat(detector.shouldInclude(p4)).isFalse()
+        assertThat(detector.shouldInclude(p5)).isFalse()
     }
 
     @Test
@@ -1266,10 +1269,65 @@ class AffectedModuleDetectorImplTest {
             ),
             config = affectedModuleConfiguration
         )
-        Truth.assertThat(detector.shouldInclude(p1)).isTrue()
-        Truth.assertThat(detector.shouldInclude(p3)).isTrue()
-        Truth.assertThat(detector.shouldInclude(p4)).isTrue()
-        Truth.assertThat(detector.shouldInclude(p5)).isTrue()
+        assertThat(detector.shouldInclude(p1)).isTrue()
+        assertThat(detector.shouldInclude(p3)).isTrue()
+        assertThat(detector.shouldInclude(p4)).isTrue()
+        assertThat(detector.shouldInclude(p5)).isTrue()
+    }
+
+    @Test
+    fun `GIVEN affected module detector config WHEN disabled and is project affected THEN all project affected`() {
+        // GIVEN
+        AffectedModuleDetector.configure(root.gradle, root)
+
+        // WHEN
+        val allProjects = root.allprojects
+
+        // THEN
+        allProjects.forEach { project ->
+            assertThat(AffectedModuleDetector.isProjectAffected(project)).isTrue()
+        }
+    }
+
+    @Test
+    fun `GIVEN affected module detector config WHEN disabled and has affected projects THEN returns true`() {
+        // GIVEN
+        AffectedModuleDetector.configure(root.gradle, root)
+
+        // WHEN
+        val result = AffectedModuleDetector.hasAffectedProjects(root)
+
+        // THEN
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `GIVEN affected module detector config WHEN disabled and is project provided THEN returns true`() {
+        // GIVEN
+        AffectedModuleDetector.configure(root.gradle, root)
+
+        // WHEN
+        val result = AffectedModuleDetector.isProjectProvided(root)
+
+        // THEN
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `GIVEN affected module detector config WHEN not configured THEN exception is thrown`() {
+        // GIVEN
+        // no op
+
+        // WHEN
+        try {
+            AffectedModuleDetector.isProjectAffected(root)
+            fail("Expected exception")
+        } catch (e: UnknownDomainObjectException) {
+            // THEN
+            assertThat(e.message).startsWith(
+                "Extension with name 'AffectedModuleDetectorPlugin' does not exist. Currently " +
+                        "registered extension names: ")
+        }
     }
 
     // For both Linux/Windows

@@ -109,8 +109,7 @@ abstract class AffectedModuleDetector {
         internal const val MODULES_ARG = "affected_module_detector.modules"
         private const val DEPENDENT_PROJECTS_ARG = "affected_module_detector.dependentProjects"
         private const val CHANGED_PROJECTS_ARG = "affected_module_detector.changedProjects"
-        private const val ENABLE_ARG = "affected_module_detector.enable"
-        var isConfigured = false
+        internal const val ENABLE_ARG = "affected_module_detector.enable"
 
         @JvmStatic
         fun configure(gradle: Gradle, rootProject: Project) {
@@ -122,7 +121,6 @@ abstract class AffectedModuleDetector {
                 )
                 return
             }
-            isConfigured = true
 
             val subset = when {
                 rootProject.hasProperty(DEPENDENT_PROJECTS_ARG) -> {
